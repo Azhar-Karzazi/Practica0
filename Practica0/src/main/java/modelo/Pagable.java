@@ -1,0 +1,5 @@
+package modelo;
+
+public interface Pagable {
+    void pagar(double cantidad);
+}
