@@ -1,8 +1,15 @@
 package modelo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 
 import java.util.Objects;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Pizza.class, name = "pizza"),
+        @JsonSubTypes.Type(value = Bebida.class, name = "bebida"),
+        @JsonSubTypes.Type(value = Pasta.class, name = "pasta")
+})
 
 public abstract class Producto {
 

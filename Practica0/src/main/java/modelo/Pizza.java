@@ -8,6 +8,8 @@ public class Pizza extends Producto {
     private Tamano tamano;
     private final List<modelo.Ingrediente> ingredientes;
 
+    public Pizza() { this.ingredientes = new ArrayList<>(); }
+
     public Pizza(String nombre, double precioBase, Tamano tamano) {
         super(nombre, precioBase);
         this.tamano = tamano;

@@ -4,6 +4,8 @@ public class Bebida extends Producto {
 
     private Tamano tamano;
 
+    public Bebida() {}
+
     public Bebida(String nombre, double precioBase, Tamano tamano) {
         super(nombre, precioBase);
         this.tamano = tamano == null ? Tamano.MEDIANA : tamano;

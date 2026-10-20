@@ -7,6 +7,8 @@ public class Pasta extends Producto {
 
     private List<modelo.Ingrediente> ingredientes;
 
+    public Pasta() { this.ingredientes = new ArrayList<>(); }
+
     public Pasta(String nombre, double precioBase) {
         super(nombre, precioBase);
         this.ingredientes = new ArrayList<>();
