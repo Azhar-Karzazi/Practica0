@@ -13,10 +13,12 @@ public class GestionDeArchivos {
     private final ObjectMapper mapper = new ObjectMapper();
 
     public void exportar(List<Producto> productos) throws IOException {
-        mapper.writeValue(fichero, productos);
+        mapper.writerFor(new TypeReference<List<Producto>>() {}).writeValue(fichero, productos);
     }
 
     public List<Producto> importar() throws IOException {
         return mapper.readValue(fichero, new TypeReference<List<Producto>>() {});
     }
+
+
 }
