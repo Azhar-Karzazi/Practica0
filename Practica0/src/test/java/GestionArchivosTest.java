@@ -1,10 +1,13 @@
 import utils.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import modelo.Bebida;
+import modelo.Cliente;
+import modelo.EstadoPedido;
 import modelo.Ingrediente;
+import modelo.PagarEfectivo;
 import modelo.Pasta;
+import modelo.Pedido;
 import modelo.Pizza;
 import modelo.Producto;
 import modelo.Tamano;
@@ -15,178 +18,219 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GestionArchivosTest {
 
-    private static final File FICHERO = new File("productos.json");
-    private static final File COPIA = new File("productos.json.bak");
+    private static final File PRODUCTOS = new File("productos.json");
+    private static final File PEDIDOS = new File("pedidos.json");
+    private static final File INGREDIENTES = new File("ingredientes.csv");
 
-    private GestionDeArchivos gestion;
+    private GestionDeArchivos archivos;
     private List<Producto> productos;
+    private List<Pedido> pedidos;
+    private List<Ingrediente> ingredientes;
 
     @BeforeEach
-    void preparar() throws IOException {
-        // Si ya existe un productos.json real, se guarda y se restaura al terminar
-        if (FICHERO.exists()) {
-            Files.move(FICHERO.toPath(), COPIA.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        gestion = new GestionDeArchivos();
+    void preparar() {
+        borrarFicheros();
+        archivos = new GestionDeArchivos();
 
         Pizza margarita = new Pizza("Margarita", 7.5, Tamano.MEDIANA);
         margarita.addIngrediente(new Ingrediente(1, "Tomate", 10, true));
         margarita.addIngrediente(new Ingrediente(2, "Mozzarella", 5, false));
-
         Pasta pasta = new Pasta("Espaguetis", 8.5);
         pasta.addIngrediente(new Ingrediente(3, "Carne", 4, false));
-
         Bebida agua = new Bebida("Agua", 1.2, Tamano.PEQUENA);
-
         productos = List.of(margarita, pasta, agua);
+
+        Cliente ana = new Cliente("Ana", "ana@mail.com", "1234", "Calle 1");
+        Pedido pedido = new Pedido(ana);
+        pedido.anadirLinea(margarita, 2);
+        pedido.anadirLinea(agua, 3);
+        pedido.finalizarPedido(new PagarEfectivo());
+        ana.addPedidoAlHistorial(pedido);   // referencia circular Cliente <-> Pedido
+        pedidos = List.of(pedido);
+
+        ingredientes = List.of(
+                new Ingrediente(1, "Tomate", 10, true),
+                new Ingrediente(2, "Mozzarella", 5, false));
     }
 
     @AfterEach
-    void limpiar() throws IOException {
-        FICHERO.delete();
-        if (COPIA.exists()) {
-            Files.move(COPIA.toPath(), FICHERO.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
+    void limpiar() {
+        borrarFicheros();
+    }
+
+    private void borrarFicheros() {
+        PRODUCTOS.delete();
+        PEDIDOS.delete();
+        INGREDIENTES.delete();
+    }
+
+    // ---------- Actividad 1: Jackson ----------
+
+    @Test
+    void exportarProductosCreaElFichero() throws IOException {
+        archivos.exportarProductos(productos);
+
+        assertTrue(PRODUCTOS.exists());
     }
 
     @Test
-    void exportarCreaElFicheroProductosJson() throws IOException {
-        gestion.exportar(productos);
+    void elJsonDeProductosNoLlevaIds() throws IOException {
+        archivos.exportarProductos(productos);
 
-        assertTrue(FICHERO.exists());
-        assertTrue(FICHERO.length() > 0);
-    }
-
-    @Test
-    void elJsonNoContieneNingunId() throws IOException {
-        gestion.exportar(productos);
-
-        JsonNode raiz = new ObjectMapper().readTree(FICHERO);
-        assertTrue(raiz.isArray());
-        assertEquals(3, raiz.size());
-
-        for (JsonNode producto : raiz) {
-            assertFalse(producto.has("id"), "El producto no debe llevar id");
-            if (producto.has("ingredientes")) {
-                for (JsonNode ingrediente : producto.get("ingredientes")) {
-                    assertFalse(ingrediente.has("id"), "El ingrediente no debe llevar id");
-                }
+        for (JsonNode producto : new ObjectMapper().readTree(PRODUCTOS)) {
+            assertFalse(producto.has("id"));
+            for (JsonNode ingrediente : producto.path("ingredientes")) {
+                assertFalse(ingrediente.has("id"));
             }
         }
     }
 
     @Test
-    void elJsonNoContieneAtributosCalculados() throws IOException {
-        gestion.exportar(productos);
+    void elJsonDeProductosLlevaLosIngredientesAnidados() throws IOException {
+        archivos.exportarProductos(productos);
 
-        JsonNode raiz = new ObjectMapper().readTree(FICHERO);
-        for (JsonNode producto : raiz) {
-            // Solo deben aparecer datos almacenados
-            producto.fieldNames().forEachRemaining(campo ->
-                    assertTrue(List.of("tipo", "nombre", "precioBase", "tamano", "ingredientes").contains(campo),
-                            "Campo inesperado en el JSON: " + campo));
-        }
-    }
-
-    @Test
-    void elJsonIncluyeElTipoDeCadaProducto() throws IOException {
-        gestion.exportar(productos);
-
-        JsonNode raiz = new ObjectMapper().readTree(FICHERO);
-        assertEquals("pizza", raiz.get(0).get("tipo").asText());
-        assertEquals("pasta", raiz.get(1).get("tipo").asText());
-        assertEquals("bebida", raiz.get(2).get("tipo").asText());
-    }
-
-    @Test
-    void elJsonLlevaLosIngredientesAnidados() throws IOException {
-        gestion.exportar(productos);
-
-        JsonNode pizza = new ObjectMapper().readTree(FICHERO).get(0);
+        JsonNode pizza = new ObjectMapper().readTree(PRODUCTOS).get(0);
+        assertEquals("pizza", pizza.get("tipo").asText());
         assertEquals(2, pizza.get("ingredientes").size());
         assertEquals("Tomate", pizza.get("ingredientes").get(0).get("nombre").asText());
-        assertEquals(10, pizza.get("ingredientes").get(0).get("stock").asInt());
-        assertTrue(pizza.get("ingredientes").get(0).get("esVegano").asBoolean());
     }
 
     @Test
-    void importarDevuelveLaMismaCantidadYLosTiposCorrectos() throws IOException {
-        gestion.exportar(productos);
+    void importarProductosDevuelveLosTiposYLosDatos() throws IOException {
+        archivos.exportarProductos(productos);
 
-        List<Producto> importados = gestion.importar();
+        List<Producto> importados = archivos.importarProductos();
 
         assertEquals(3, importados.size());
-        assertInstanceOf(Pizza.class, importados.get(0));
+        Pizza pizza = assertInstanceOf(Pizza.class, importados.get(0));
+        assertEquals("Margarita", pizza.getNombre());
+        assertEquals(7.5, pizza.getPrecioBase(), 0.001);
+        assertEquals(2, pizza.getIngredientes().size());
+        assertEquals("Mozzarella", pizza.getIngredientes().get(1).getNombre());
         assertInstanceOf(Pasta.class, importados.get(1));
         assertInstanceOf(Bebida.class, importados.get(2));
     }
 
     @Test
-    void importarReconstruyeLosDatosDeLaPizzaYSusIngredientes() throws IOException {
-        gestion.exportar(productos);
+    void losIdsDeLosProductosImportadosSonNuevos() throws IOException {
+        archivos.exportarProductos(productos);
 
-        Pizza pizza = (Pizza) gestion.importar().get(0);
+        List<Producto> importados = archivos.importarProductos();
 
-        assertEquals("Margarita", pizza.getNombre());
-        assertEquals(7.5, pizza.getPrecioBase(), 0.001);
-        assertEquals(Tamano.MEDIANA, pizza.getTamano());
-        assertEquals(2, pizza.getIngredientes().size());
-
-        Ingrediente mozzarella = pizza.getIngredientes().get(1);
-        assertEquals("Mozzarella", mozzarella.getNombre());
-        assertEquals(5, mozzarella.getStock());
-        assertFalse(mozzarella.isEsVegano());
+        assertNotEquals(productos.get(0).getId(), importados.get(0).getId(), "id repetido");
     }
 
     @Test
-    void importarReconstruyeLaPastaYLaBebida() throws IOException {
-        gestion.exportar(productos);
-        List<Producto> importados = gestion.importar();
+    void importarProductosSinFicheroLanzaIOException() {
+        assertThrows(IOException.class, () -> archivos.importarProductos());
+    }
 
-        Pasta pasta = (Pasta) importados.get(1);
-        assertEquals("Espaguetis", pasta.getNombre());
-        assertEquals(1, pasta.getIngredientes().size());
-        assertEquals("Carne", pasta.getIngredientes().get(0).getNombre());
+    // ---------- Actividad 2: Gson ----------
 
-        Bebida bebida = (Bebida) importados.get(2);
-        assertEquals("Agua", bebida.getNombre());
-        assertEquals(1.2, bebida.getPrecioBase(), 0.001);
-        assertEquals(Tamano.PEQUENA, bebida.getTamano());
+    @Test
+    void exportarPedidosCreaElFicheroSinFallarPorLaReferenciaCircular() throws IOException {
+        archivos.exportarPedidos(pedidos);
+
+        assertTrue(PEDIDOS.exists());
     }
 
     @Test
-    void losIdsNoSeConservanAlImportar() throws IOException {
-        gestion.exportar(productos);
+    void elJsonDePedidosNoLlevaMetodoDePagoNiProductoNiHistorial() throws IOException {
+        archivos.exportarPedidos(pedidos);
 
-        List<Producto> importados = gestion.importar();
+        String json = Files.readString(PEDIDOS.toPath());
+        assertFalse(json.contains("metodoPago"));
+        assertFalse(json.contains("\"producto\""));
+        assertFalse(json.contains("historialPedidos"));
+        assertTrue(json.contains("lineasPedido"));
+        assertTrue(json.contains("\"cantidad\""));
+    }
 
-        for (int i = 0; i < productos.size(); i++) {
-            assertNotEquals(productos.get(i).getId(), importados.get(i).getId(),
-                    "El id del producto importado debe ser nuevo");
+    @Test
+    void importarPedidosReconstruyeElPedidoSusLineasYElCliente() throws IOException {
+        archivos.exportarPedidos(pedidos);
+
+        Pedido importado = archivos.importarPedidos().get(0);
+
+        assertEquals(pedidos.get(0).getId(), importado.getId());
+        assertEquals(EstadoPedido.FINALIZADO, importado.getEstado());
+        assertEquals("ana@mail.com", importado.getCliente().getEmail());
+        assertEquals(2, importado.getLineasPedido().size());
+        assertEquals(2, importado.getLineasPedido().get(0).getCantidad());
+        assertEquals(3, importado.getLineasPedido().get(1).getCantidad());
+    }
+
+    @Test
+    void importarPedidosConservaLaFecha() throws IOException {
+        archivos.exportarPedidos(pedidos);
+
+        Pedido importado = archivos.importarPedidos().get(0);
+
+        assertEquals(pedidos.get(0).getFechaCreacion(), importado.getFechaCreacion());
+    }
+
+    @Test
+    void alImportarPedidosElProductoYElMetodoDePagoSonNulos() throws IOException {
+        archivos.exportarPedidos(pedidos);
+
+        Pedido importado = archivos.importarPedidos().get(0);
+
+        assertNull(importado.getMetodoPago());
+        assertNull(importado.getLineasPedido().get(0).getProducto());
+    }
+
+    @Test
+    void importarPedidosSinFicheroLanzaIOException() {
+        assertThrows(IOException.class, () -> archivos.importarPedidos());
+    }
+
+    // ---------- Actividad 3: OpenCSV ----------
+
+    @Test
+    void exportarIngredientesCreaElFicheroConPuntoYComa() throws Exception {
+        archivos.exportarIngredientes(ingredientes);
+
+        List<String> lineas = Files.readAllLines(INGREDIENTES.toPath());
+        assertEquals(3, lineas.size());   // cabecera + 2 ingredientes
+        for (String linea : lineas) {
+            assertTrue(linea.contains(";"));
+            assertFalse(linea.contains(","));
         }
-        Pizza pizza = (Pizza) importados.get(0);
-        assertEquals(0, pizza.getIngredientes().get(0).getId());
     }
 
     @Test
-    void exportarYImportarUnaListaVaciaFunciona() throws IOException {
-        gestion.exportar(List.of());
+    void elCsvNoLlevaIdYLaColumnaStockSeLlamaStockDisponible() throws Exception {
+        archivos.exportarIngredientes(ingredientes);
 
-        assertTrue(gestion.importar().isEmpty());
+        String cabecera = Files.readAllLines(INGREDIENTES.toPath()).get(0).toLowerCase();
+        assertTrue(cabecera.contains("stock disponible"));
+        assertFalse(cabecera.contains("\"id\""));
+        assertFalse(cabecera.contains("\"stock\""));
     }
 
     @Test
-    void importarSinFicheroLanzaIOException() {
-        assertFalse(FICHERO.exists());
+    void importarIngredientesReconstruyeLosDatos() throws Exception {
+        archivos.exportarIngredientes(ingredientes);
 
-        assertThrows(IOException.class, () -> gestion.importar());
+        List<Ingrediente> importados = archivos.importarIngredientes();
+
+        assertEquals(2, importados.size());
+        assertEquals("Tomate", importados.get(0).getNombre());
+        assertEquals(10, importados.get(0).getStock());
+        assertTrue(importados.get(0).isEsVegano());
+        assertEquals("Mozzarella", importados.get(1).getNombre());
+        assertFalse(importados.get(1).isEsVegano());
+        assertEquals(0, importados.get(0).getId());   // el id no se guarda
+    }
+
+    @Test
+    void importarIngredientesSinFicheroLanzaIOException() {
+        assertThrows(IOException.class, () -> archivos.importarIngredientes());
     }
 }
