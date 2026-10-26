@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class LineaPedido {
 
-    private final Producto producto;
+    private final transient Producto producto;
     private int cantidad;
 
     public LineaPedido(Producto producto, int cantidad) {

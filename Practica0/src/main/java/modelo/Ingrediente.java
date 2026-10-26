@@ -1,14 +1,22 @@
 package modelo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.opencsv.bean.CsvBindByName;
+import com.opencsv.bean.CsvIgnore;
 
 public class Ingrediente {
 
+    @CsvIgnore
     @JsonIgnore
     private int id;
 
+    @CsvBindByName
     private String nombre;
+
+    @CsvBindByName(column = "Stock disponible")
     private int stock;
+
+    @CsvBindByName
     private boolean esVegano;
 
     public Ingrediente(){}

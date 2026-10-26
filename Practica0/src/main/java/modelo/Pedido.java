@@ -1,5 +1,6 @@
 package modelo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +14,8 @@ public class Pedido {
     private final Cliente cliente;
     private final List<LineaPedido> lineasPedido;
     private EstadoPedido estado;
-    private Pagable metodoPago;
-    private final LocalDateTime fechaCreacion;
+    private transient Pagable metodoPago;
+    private final LocalDate fechaCreacion;
 
     public Pedido(Cliente cliente) {
         if (cliente == null) {
@@ -24,7 +25,7 @@ public class Pedido {
         this.cliente = cliente;
         this.lineasPedido = new ArrayList<>();
         this.estado = modelo.EstadoPedido.PENDIENTE;
-        this.fechaCreacion = LocalDateTime.now();
+        this.fechaCreacion = LocalDate.now();
     }
 
     public LineaPedido anadirLinea(Producto producto, int cantidad) {
@@ -100,7 +101,7 @@ public class Pedido {
         return metodoPago;
     }
 
-    public LocalDateTime getFechaCreacion() {
+    public LocalDate getFechaCreacion() {
         return fechaCreacion;
     }
 

@@ -11,9 +11,14 @@ public class Cliente {
     private final int id;
     private String nombre;
     private String email;
-    private String password;
+    private transient String  password;
     private String direccion;
-    private final List<Pedido> historialPedidos;
+    private final transient List<Pedido> historialPedidos;
+
+    public Cliente(int id, List<Pedido> historialPedidos){
+        this.id = id;
+        this.historialPedidos = historialPedidos;
+    }
 
     public Cliente(String nombre, String email, String password, String direccion) {
         if (nombre == null || nombre.isBlank()) {
