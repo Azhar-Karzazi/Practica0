@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,7 +32,12 @@ public class GestionDeArchivos {
 
     public static List<Producto> importarProductos() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(new File("productos.json"), new TypeReference<List<Producto>>() {});
+        File fichero = new File("productos.json");
+
+        if (!fichero.exists() || fichero.length() == 0) {
+            return new ArrayList<>();
+        }
+        return mapper.readValue(fichero, new TypeReference<List<Producto>>() {});
     }
 
     // ACTIVIDAD 2: Gson (pedidos.json)
@@ -43,9 +49,16 @@ public class GestionDeArchivos {
     }
 
     public static List<Pedido> importarPedidos() throws IOException {
+        File fichero = new File("pedidos.json");
+
+        if (!fichero.exists() || fichero.length() == 0) {
+            return new ArrayList<>();
+        }
+
         Gson gson = crearGson();
-        try (FileReader reader = new FileReader("pedidos.json")) {
-            return Arrays.asList(gson.fromJson(reader, Pedido[].class));
+        try (FileReader reader = new FileReader(fichero)) {
+            Pedido[] pedidos = gson.fromJson(reader, Pedido[].class);
+            return pedidos == null ? new ArrayList<>() : Arrays.asList(pedidos);
         }
     }
 
