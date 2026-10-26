@@ -11,14 +11,9 @@ public class Cliente {
     private final int id;
     private String nombre;
     private String email;
-    private transient String  password;
+    private transient String password;
     private String direccion;
     private final transient List<Pedido> historialPedidos;
-
-    public Cliente(int id, List<Pedido> historialPedidos){
-        this.id = id;
-        this.historialPedidos = historialPedidos;
-    }
 
     public Cliente(String nombre, String email, String password, String direccion) {
         if (nombre == null || nombre.isBlank()) {
@@ -29,7 +24,7 @@ public class Cliente {
         }
         this.id = ++contadorId;
         this.nombre = nombre;
-        this.email = email;
+        this.email = email.trim().toLowerCase();
         this.password = password;
         this.direccion = direccion;
         this.historialPedidos = new ArrayList<>();
@@ -51,7 +46,7 @@ public class Cliente {
 
     public void setNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre del producto no puede estar vacío");
+            throw new IllegalArgumentException("El nombre del cliente no puede estar vacío");
         }
         this.nombre = nombre;
     }
@@ -61,9 +56,10 @@ public class Cliente {
     }
 
     public void setEmail(String email) {
-        if(!email.isBlank()) {
-            this.email = email.trim().toLowerCase();
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("El email del cliente no puede estar vacío");
         }
+        this.email = email.trim().toLowerCase();
     }
 
     public String getPassword() {

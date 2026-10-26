@@ -5,7 +5,6 @@ import modelo.Cliente;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ClienteControlador {
 
@@ -39,6 +38,7 @@ public class ClienteControlador {
     public Cliente actualizarCliente(String email, Cliente datos) {
         Cliente cliente = buscarPorEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("El cliente indicado no existe"));
+        validarEmailLibre(datos.getEmail(), cliente);
 
         cliente.setNombre(datos.getNombre());
         cliente.setEmail(datos.getEmail());
@@ -50,6 +50,13 @@ public class ClienteControlador {
     public void eliminar(Cliente cliente) {
         if (cliente == null || !clientes.remove(cliente)) {
             throw new IllegalArgumentException("El cliente indicado no existe");
+        }
+    }
+
+    private void validarEmailLibre(String email, Cliente propietario) {
+        boolean ocupado = buscarPorEmail(email).filter(otro -> otro != propietario).isPresent();
+        if (ocupado) {
+            throw new IllegalArgumentException("Ya existe un cliente registrado con ese email");
         }
     }
 }

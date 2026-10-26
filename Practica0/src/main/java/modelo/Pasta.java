@@ -5,27 +5,30 @@ import java.util.List;
 
 public class Pasta extends Producto {
 
-    private List<modelo.Ingrediente> ingredientes;
+    private final List<Ingrediente> ingredientes = new ArrayList<>();
 
-    public Pasta() { this.ingredientes = new ArrayList<>(); }
+    public Pasta() {
+    }
 
     public Pasta(String nombre, double precioBase) {
         super(nombre, precioBase);
-        this.ingredientes = new ArrayList<>();
     }
 
-    public void addIngrediente(modelo.Ingrediente ingrediente) {
+    public void addIngrediente(Ingrediente ingrediente) {
         if (ingrediente != null) {
             ingredientes.add(ingrediente);
         }
     }
 
-    public List<modelo.Ingrediente> getIngredientes() {
-        return ingredientes;
+    public List<Ingrediente> getIngredientes() {
+        return new ArrayList<>(ingredientes);
     }
 
-    public void setIngredientes(List<modelo.Ingrediente> ingredientes) {
-        this.ingredientes = ingredientes;
+    public void setIngredientes(List<Ingrediente> nuevosIngredientes) {
+        ingredientes.clear();
+        if (nuevosIngredientes != null) {
+            ingredientes.addAll(nuevosIngredientes);
+        }
     }
 
     @Override

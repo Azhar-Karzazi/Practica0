@@ -1,6 +1,10 @@
 package controlador;
 
-import modelo.*;
+import modelo.Cliente;
+import modelo.EstadoPedido;
+import modelo.Pagable;
+import modelo.Pedido;
+import modelo.Producto;
 import utils.GestionDeArchivos;
 
 import java.io.IOException;
@@ -23,9 +27,8 @@ public class PedidoControlador {
             pedidoPendiente = new Pedido(cliente);
             cliente.addPedidoAlHistorial(pedidoPendiente);
             pedidos.add(pedidoPendiente);
-        } else {
-            pedidoPendiente.anadirLinea(producto, cantidad);
         }
+        pedidoPendiente.anadirLinea(producto, cantidad);
     }
 
     public void finalizarPedido(Pagable pagable, Cliente cliente) {
@@ -68,7 +71,7 @@ public class PedidoControlador {
         return new ArrayList<>(pedidos);
     }
 
-    public void exportarPedido() throws IOException {
+    public void exportarPedidos() throws IOException {
         GestionDeArchivos.exportarPedidos(pedidos);
     }
 

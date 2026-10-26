@@ -19,7 +19,7 @@ public class LineaPedido {
     }
 
     public double calcularSubtotal() {
-        return producto.getPrecioBase() * cantidad;
+        return producto == null ? 0 : producto.getPrecioBase() * cantidad;
     }
 
     public Producto getProducto() {
@@ -45,6 +45,7 @@ public class LineaPedido {
 
     @Override
     public String toString() {
-        return String.format("%d x %s = %.2f€", cantidad, producto.getNombre(), calcularSubtotal());
+        String nombreProducto = producto == null ? "(sin producto)" : producto.getNombre();
+        return String.format("%d x %s = %.2f€", cantidad, nombreProducto, calcularSubtotal());
     }
 }

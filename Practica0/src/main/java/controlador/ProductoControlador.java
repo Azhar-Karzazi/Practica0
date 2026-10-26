@@ -1,7 +1,12 @@
 package controlador;
 
 import com.opencsv.exceptions.CsvException;
-import modelo.*;
+import modelo.Bebida;
+import modelo.Ingrediente;
+import modelo.Pasta;
+import modelo.Pizza;
+import modelo.Producto;
+import modelo.Tamano;
 import utils.GestionDeArchivos;
 
 import java.io.IOException;
@@ -10,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ProductoControlador {
+
     private final List<Producto> productos;
 
     public ProductoControlador() {
@@ -50,7 +56,6 @@ public class ProductoControlador {
         if (producto == null || !productos.remove(producto)) {
             throw new IllegalArgumentException("El producto indicado no existe");
         }
-        productos.remove((producto));
     }
 
     public void exportarProductos() throws IOException {
@@ -65,7 +70,7 @@ public class ProductoControlador {
         GestionDeArchivos.exportarIngredientes(ingredientes);
     }
 
-    public List<Ingrediente> importarIngredientes() throws  IOException {
+    public List<Ingrediente> importarIngredientes() throws IOException {
         return GestionDeArchivos.importarIngredientes();
     }
 }
