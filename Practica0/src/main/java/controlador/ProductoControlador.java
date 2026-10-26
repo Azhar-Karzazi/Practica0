@@ -1,11 +1,12 @@
 package controlador;
 
 import modelo.*;
+import utils.GestionDeArchivos;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ProductoControlador {
     private final List<Producto> productos;
@@ -49,5 +50,13 @@ public class ProductoControlador {
             throw new IllegalArgumentException("El producto indicado no existe");
         }
         productos.remove((producto));
+    }
+
+    public void exportarProductos() throws IOException {
+        GestionDeArchivos.exportarProductos(productos);
+    }
+
+    public List<Producto> importarProductos() throws IOException {
+        return GestionDeArchivos.importarProductos();
     }
 }

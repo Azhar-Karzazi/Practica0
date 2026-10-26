@@ -1,7 +1,9 @@
 package controlador;
 
 import modelo.*;
+import utils.GestionDeArchivos;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,5 +66,13 @@ public class PedidoControlador {
 
     public List<Pedido> listarPedidos() {
         return new ArrayList<>(pedidos);
+    }
+
+    public void exportarPedido() throws IOException {
+        GestionDeArchivos.exportarPedidos(pedidos);
+    }
+
+    public List<Pedido> importarPedidos() throws IOException {
+        return GestionDeArchivos.importarPedidos();
     }
 }
