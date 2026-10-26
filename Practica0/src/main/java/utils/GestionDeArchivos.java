@@ -79,7 +79,11 @@ public class GestionDeArchivos {
     }
 
     public static List<Ingrediente> importarIngredientes() throws IOException {
-        try (FileReader reader = new FileReader("ingredientes.csv")) {
+        File fichero = new File("ingredientes.csv");
+        if (!fichero.exists() || fichero.length() == 0) {
+            return new ArrayList<>();
+        }
+        try (FileReader reader = new FileReader(fichero)) {
             CsvToBean<Ingrediente> csvToBean = new CsvToBeanBuilder<Ingrediente>(reader)
                     .withType(Ingrediente.class)
                     .withSeparator(';')
