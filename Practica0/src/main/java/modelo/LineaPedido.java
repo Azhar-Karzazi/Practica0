@@ -30,12 +30,6 @@ public class LineaPedido {
         return cantidad;
     }
 
-    public void setCantidad(int cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
-        }
-        this.cantidad = cantidad;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -33,15 +33,21 @@ public class ProductoControlador {
         return Collections.unmodifiableList(productos);
     }
 
-    public List<Producto> actualizarProducto(String nombre, Producto actualizado){
-        return productos.stream()
-                .map(p -> p.getNombre().equals(nombre) ? actualizado : p)
-                .collect((Collectors.toList()));
+    public Producto actualizarProducto(int id, Producto datos) {
+        Producto producto = productos.stream()
+                .filter(p -> p.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("El producto indicado no existe"));
+
+        producto.setNombre(datos.getNombre());
+        producto.setPrecioBase(datos.getPrecioBase());
+        return producto;
     }
 
     public void eliminar(Producto producto) {
         if (producto == null || !productos.remove(producto)) {
             throw new IllegalArgumentException("El producto indicado no existe");
         }
+        productos.remove((producto));
     }
 }

@@ -35,15 +35,8 @@ public class Cliente {
         this.historialPedidos = new ArrayList<>();
     }
 
-    public Pedido realizarPedido(Producto producto, int cantidad) {
-        Pedido pedido = new Pedido(this);
-        pedido.anadirLinea(producto, cantidad);
-        historialPedidos.add(pedido);
-        return pedido;
-    }
-
     public void addPedidoAlHistorial(Pedido pedido) {
-        if (pedido != null && !historialPedidos.contains(pedido)) {
+        if (pedido != null && !historialPedidos.contains(pedido) && pedido.getCliente() == this) {
             historialPedidos.add(pedido);
         }
     }
@@ -68,7 +61,9 @@ public class Cliente {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        if(!email.isBlank()) {
+            this.email = email.trim().toLowerCase();
+        }
     }
 
     public String getPassword() {

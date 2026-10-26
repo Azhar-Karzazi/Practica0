@@ -61,8 +61,9 @@ public class Pedido {
         if (metodoPago == null) {
             throw new IllegalArgumentException("Debe indicarse un método de pago");
         }
-        this.metodoPago = metodoPago;
+
         metodoPago.pagar(calcularTotal());
+        this.metodoPago = metodoPago;
         this.estado = EstadoPedido.FINALIZADO;
     }
 

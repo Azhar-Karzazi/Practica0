@@ -58,7 +58,7 @@ public abstract class Producto {
     }
 
     public void setPrecioBase(double precioBase) {
-        if (precioBase < 0) {
+        if (precioBase <= 0) {
             throw new IllegalArgumentException("El precio no puede ser negativo");
         }
         this.precioBase = precioBase;

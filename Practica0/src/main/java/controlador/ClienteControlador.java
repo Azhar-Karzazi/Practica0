@@ -36,10 +36,15 @@ public class ClienteControlador {
         return new ArrayList<>(clientes);
     }
 
-    public List<Cliente> actualizarCliente(String email, Cliente actualizado){
-        return clientes.stream()
-                .map(c -> c.getEmail().equals(email) ? actualizado : c)
-                .collect((Collectors.toList()));
+    public Cliente actualizarCliente(String email, Cliente datos) {
+        Cliente cliente = buscarPorEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("El cliente indicado no existe"));
+
+        cliente.setNombre(datos.getNombre());
+        cliente.setEmail(datos.getEmail());
+        cliente.setPassword(datos.getPassword());
+        cliente.setDireccion(datos.getDireccion());
+        return cliente;
     }
 
     public void eliminar(Cliente cliente) {

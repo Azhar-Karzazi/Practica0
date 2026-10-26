@@ -21,9 +21,9 @@ public class PedidoControlador {
             pedidoPendiente = new Pedido(cliente);
             cliente.addPedidoAlHistorial(pedidoPendiente);
             pedidos.add(pedidoPendiente);
+        } else {
+            pedidoPendiente.anadirLinea(producto, cantidad);
         }
-
-        pedidoPendiente.anadirLinea(producto, cantidad);
     }
 
     public void finalizarPedido(Pagable pagable, Cliente cliente) {
