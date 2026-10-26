@@ -1,5 +1,6 @@
 package controlador;
 
+import com.opencsv.exceptions.CsvException;
 import modelo.*;
 import utils.GestionDeArchivos;
 
@@ -58,5 +59,13 @@ public class ProductoControlador {
 
     public List<Producto> importarProductos() throws IOException {
         return GestionDeArchivos.importarProductos();
+    }
+
+    public void exportarIngredientes(List<Ingrediente> ingredientes) throws IOException, CsvException {
+        GestionDeArchivos.exportarIngredientes(ingredientes);
+    }
+
+    public List<Ingrediente> importarIngredientes() throws  IOException {
+        return GestionDeArchivos.importarIngredientes();
     }
 }

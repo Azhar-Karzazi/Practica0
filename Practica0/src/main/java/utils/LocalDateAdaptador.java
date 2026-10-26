@@ -15,8 +15,7 @@ public class LocalDateAdaptador implements JsonSerializer<LocalDate>, JsonDeseri
     }
 
     @Override
-    public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-            throws JsonParseException {
+    public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         return LocalDate.parse(json.getAsString(), formatter);
     }
 }
